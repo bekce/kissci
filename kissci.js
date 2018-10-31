@@ -50,6 +50,7 @@ var webhook_handler = github_webhook_handler({ path: '/webhook', secret: BUILD_S
 
 function buildSha (sha) {
   var logLoc=SELF_BASE_URL+'/logs?sha='+sha;
+  // lock (build) timeout = 15 minutes. If you need more than that, increase this number. 
   redis_lock(FULL_REPO, 900000, function(unlock) {
     // clone repo to temp dir
     console.log('Acquired lock, running prepare.sh')
@@ -179,11 +180,8 @@ function handleRequest(request, response){
   });
 }
 
-//Create a server
 var server = http.createServer(handleRequest);
 
-//Lets start our server
 server.listen(PORT, function(){
-    //Callback triggered when server is successfully listening. Hurray!
     console.log("Server listening on: http://0.0.0.0:%s", PORT);
 });
