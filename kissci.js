@@ -26,8 +26,8 @@ const octokit = require('@octokit/rest')({
 });
 
 var args = process.argv.slice(2); //first two params are 'node' and 'kissci.js'
-if(args.length != 6) {
-  console.log("Usage: node kissci.js <self_base_url> <port> <build_secret> <github_token> <github_owner> <github_repo>");
+if(args.length < 6) {
+  console.log("Usage: node kissci.js <self_base_url> <port> <build_secret> <github_token> <github_owner> <github_repo> [<custom_build_sh_full_path>]");
   process.exit(1);
 }
 
@@ -39,6 +39,7 @@ const GITHUB_OWNER=args[4];
 const GITHUB_REPO=args[5];
 const FULL_REPO=GITHUB_OWNER+'_'+GITHUB_REPO;
 const CLONE_ADDRESS='https://github.com/'+GITHUB_OWNER+'/'+GITHUB_REPO+'.git'
+const BUILD_SH_PATH=args.length>=7?args[6]:'./build.sh'
 
 // token (https://github.com/settings/tokens)
 octokit.authenticate({
@@ -55,7 +56,7 @@ function buildSha (sha) {
     // clone repo to temp dir
     console.log('Acquired lock, running prepare.sh')
     fs.truncate('logs/'+sha,0,function(){
-      var child = spawn('./prepare.sh', [CLONE_ADDRESS, sha]);
+      var child = spawn('./prepare.sh', [CLONE_ADDRESS, sha, BUILD_SH_PATH]);
       child.stdout.on('data', function (data) {
         fs.appendFileSync('logs/'+sha, data);
       });
