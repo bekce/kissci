@@ -1,4 +1,4 @@
-// KISS (Keep-It-Simple-Stupid) CI for Gitlab.com
+// KISS (Keep-It-Simple-Stupid) CI for Gitlab
 // Author: S. Eren Bekçe <seb@sebworks.com>
 
 var http = require('http');
@@ -35,11 +35,13 @@ const GITLAB_TOKEN=args[3];
 const GITLAB_OWNER=args[4];
 const GITLAB_REPO=args[5];
 const FULL_REPO=GITLAB_OWNER+'_'+GITLAB_REPO;
-const CLONE_ADDRESS='https://gitlab.com/'+GITLAB_OWNER+'/'+GITLAB_REPO+'.git'
+const GITLAB_BASE='https://gitlab.com'
+const CLONE_ADDRESS=GITLAB_BASE+'/'+GITLAB_OWNER+'/'+GITLAB_REPO+'.git'
 const BUILD_SH_PATH=args.length>=7?args[6]:'./build.sh'
 
 // Instantiating
 const api = new Gitlab({
+  url: GITLAB_BASE,
   token: GITLAB_TOKEN
 })
 
