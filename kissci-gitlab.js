@@ -71,7 +71,7 @@ function buildSha (sha) {
           context: 'kissci'
         };
         if(code != 0){ // failed
-          obj.state='error';
+          obj.state='failed';
           obj.description='Error while building, exited with '+code;
         } else {
           obj.state='success'
