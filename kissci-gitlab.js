@@ -49,12 +49,12 @@ var webhook_handler = gitlab_webhook_handler({ path: '/webhook', secret: BUILD_S
 
 function buildSha (sha) {
   var logLoc=SELF_BASE_URL+'/logs?sha='+sha;
-  // lock (build) timeout = 15 minutes. If you need more than that, increase this number. 
+  // lock (build) timeout = 15 minutes. If you need more than that, increase this number.
   redis_lock(FULL_REPO, 900000, function(unlock) {
     // clone repo to temp dir
     console.log('Acquired lock, running prepare.sh')
     fs.truncate('logs/'+sha,0,function(){
-      var child = spawn('./prepare.sh', [CLONE_ADDRESS, sha, BUILD_SH_PATH]);
+      var child = spawn('./prepare.sh', [FULL_REPO, CLONE_ADDRESS, sha, BUILD_SH_PATH]);
       child.stdout.on('data', function (data) {
         fs.appendFileSync('logs/'+sha, data);
       });
@@ -83,7 +83,7 @@ function buildSha (sha) {
         unlock();
       });
     });
-  });  
+  });
 };
 
 webhook_handler.on('push', function (event) {
@@ -107,7 +107,7 @@ webhook_handler.on('push', function (event) {
     // console.log("%d %s: %s", result.statusCode, result.statusMessage, result.body)
     console.log("ERROR %s: %s", result.name, result.message)
   });
-  
+
   console.log('Acquiring lock');
   buildSha(sha);
 });
@@ -125,7 +125,7 @@ function handleRequest(request, response){
       var sha = parsed.query.sha;
       if (sha != null){
         var patt = new RegExp("^[A-Za-z0-9]+$");
-        var res = patt.test(sha); 
+        var res = patt.test(sha);
         if(res){
           try {
             var tail_p = parsed.query.tail;

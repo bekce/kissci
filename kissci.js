@@ -12,7 +12,7 @@ var github_webhook_handler = require('github-webhook-handler')
 var fs = require('fs');
 Tail = require('tail').Tail;
 var HttpsProxyAgent = require('https-proxy-agent');
- 
+
 // HTTP/HTTPS proxy to connect to
 var proxy = process.env.https_proxy || null;
 var agent;
@@ -51,12 +51,12 @@ var webhook_handler = github_webhook_handler({ path: '/webhook', secret: BUILD_S
 
 function buildSha (sha) {
   var logLoc=SELF_BASE_URL+'/logs?sha='+sha;
-  // lock (build) timeout = 15 minutes. If you need more than that, increase this number. 
+  // lock (build) timeout = 15 minutes. If you need more than that, increase this number.
   redis_lock(FULL_REPO, 900000, function(unlock) {
     // clone repo to temp dir
     console.log('Acquired lock, running prepare.sh')
     fs.truncate('logs/'+sha,0,function(){
-      var child = spawn('./prepare.sh', [CLONE_ADDRESS, sha, BUILD_SH_PATH]);
+      var child = spawn('./prepare.sh', [FULL_REPO, CLONE_ADDRESS, sha, BUILD_SH_PATH]);
       child.stdout.on('data', function (data) {
         fs.appendFileSync('logs/'+sha, data);
       });
@@ -70,7 +70,7 @@ function buildSha (sha) {
         console.log('prepare.sh finished with exit code '+code)
         var obj = {
           owner: GITHUB_OWNER,
-          repo: GITHUB_REPO, 
+          repo: GITHUB_REPO,
           sha: sha,
           target_url: logLoc,
           context: 'kissci'
@@ -92,7 +92,7 @@ function buildSha (sha) {
         unlock();
       });
     });
-  });  
+  });
 };
 
 webhook_handler.on('push', function (event) {
@@ -107,7 +107,7 @@ webhook_handler.on('push', function (event) {
   // mark commit as pending
   octokit.repos.createStatus({
     owner: GITHUB_OWNER,
-    repo: GITHUB_REPO, 
+    repo: GITHUB_REPO,
     sha: sha,
     state: 'pending',
     target_url: logLoc+'&tail=true',
@@ -120,7 +120,7 @@ webhook_handler.on('push', function (event) {
       // console.log(result)
     }
   });
-  
+
   console.log('Acquiring lock');
   buildSha(sha);
 });
@@ -138,7 +138,7 @@ function handleRequest(request, response){
       var sha = parsed.query.sha;
       if (sha != null){
         var patt = new RegExp("^[A-Za-z0-9]+$");
-        var res = patt.test(sha); 
+        var res = patt.test(sha);
         if(res){
           try {
             var tail_p = parsed.query.tail;
