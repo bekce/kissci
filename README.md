@@ -2,6 +2,10 @@
 
 Simple CI server for Github and Gitlab projects. It will auto pull on every push and build your project. It will update your commit using Github/Gitlab Status API, and add a link to itself to show the build logs.
 
+## Build Sequence
+
+![sequence-diagram](https://user-images.githubusercontent.com/5337921/51337109-9177d400-1a86-11e9-8e9e-cd0a379e131a.png)
+
 ## Github Instructions 
 
 1. Have Node.js installed. 
